@@ -7,26 +7,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const toggle = document.querySelector('.menu-toggle');
   const links = document.querySelector('.nav-links');
   const toast = document.querySelector('.toast');
-  const themeToggle = document.querySelector('.theme-toggle');
-
-  const preferredTheme = localStorage.getItem('ngcn_theme');
-  const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-  const applyTheme = (theme) => {
-    const dark = theme === 'dark';
-    document.documentElement.classList.remove('theme-preload-dark');
-    document.body.classList.toggle('public-dark', dark);
-    if (themeToggle) {
-      themeToggle.setAttribute('aria-pressed', String(dark));
-      themeToggle.setAttribute('aria-label', dark ? 'Switch to light theme' : 'Switch to dark theme');
-    }
-  };
-  applyTheme(preferredTheme || (systemDark ? 'dark' : 'light'));
-  themeToggle?.addEventListener('click', () => {
-    const next = document.body.classList.contains('public-dark') ? 'light' : 'dark';
-    localStorage.setItem('ngcn_theme', next);
-    applyTheme(next);
-  });
-
   const setScrolled = () => header?.classList.toggle('scrolled', window.scrollY > 24);
   setScrolled();
   window.addEventListener('scroll', setScrolled, { passive: true });

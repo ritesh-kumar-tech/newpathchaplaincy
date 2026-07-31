@@ -9,9 +9,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,650;9..144,800&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-  <script>
-    (function(){try{var t=localStorage.getItem('ngcn_theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||(!t&&d))document.documentElement.classList.add('theme-preload-dark');}catch(e){}}());
-  </script>
   <link rel="stylesheet" href="assets/css/styles.css" />
   <script defer src="assets/js/main.js"></script>
 </head>
@@ -20,7 +17,6 @@
     <nav class="nav container" aria-label="Primary navigation">
       <a class="brand" href="#home"><img src="assets/img/logo.png" alt="Newpath Global Chaplaincy Network logo"><span>Newpath Global<br>Chaplaincy Network</span></a>
       <div class="nav-actions">
-        <button class="theme-toggle" type="button" aria-label="Switch to dark theme" aria-pressed="false"><span class="sun">☼</span><span class="moon">◐</span></button>
         <button class="menu-toggle" type="button" aria-label="Open menu" aria-expanded="false"><span></span><span></span><span></span></button>
       </div>
       <div class="nav-links">
@@ -40,7 +36,8 @@
           <div class="hero-actions"><a class="btn primary magnetic" href="#membership">Become a Member</a><a class="btn secondary magnetic" href="#training">Explore Training</a></div>
         </div>
         <div class="hero-card reveal" data-parallax>
-          <div class="portal-card"><span class="pill">Verified Platform</span><span class="live-dot">Live Portal</span><strong>Digital Chaplaincy Portal</strong><p>Membership, training, licensing, applications, and admin review in one modern platform.</p><ul><li>Secure Credential Verification</li><li>Interactive Training Modules</li></ul></div>
+          <img src="assets/img/logo.png" alt="Newpath logo">
+          <div class="portal-card"><strong>Digital Chaplaincy Portal</strong><p>Membership, training, licensing, applications, and admin review in one modern platform.</p></div>
         </div>
         <div class="hero-stats reveal" aria-label="Network highlights">
           <div><strong data-count="1">Global</strong><span>network vision</span></div>
@@ -60,7 +57,7 @@
       </div>
     </section>
 
-    <section id="membership" class="section membership-lab section-observed">
+    <section id="membership" class="section dark membership-lab section-observed">
       <div class="container membership-shell">
         <div class="reveal membership-intro"><p class="eyebrow">Become a Member</p><h2>Join a growing network of servant leaders.</h2><p>Members receive access to announcements, training updates, chaplaincy resources, events, mentoring opportunities, and credentialing pathways.</p><ul class="feature-list"><li>Verified Credentialing & Endorsement Pathways</li><li>Global Network & Collaborative Ministry Forums</li><li>Emergency, Disaster, & First-Responder Protocols</li><li>Continuing Education & Pastoral Mentorship</li></ul></div>
         <form class="form-card reveal" data-form="membership" data-endpoint="api/membership.php" novalidate>

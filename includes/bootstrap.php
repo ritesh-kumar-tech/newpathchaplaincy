@@ -53,8 +53,172 @@ function db(): PDO
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
         PDO::ATTR_EMULATE_PREPARES => false,
     ]);
+    ensure_app_schema($pdo);
 
     return $pdo;
+}
+
+function ensure_app_schema(PDO $pdo): void
+{
+    static $done = false;
+    if ($done) {
+        return;
+    }
+    $done = true;
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS admin_users (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(120) NOT NULL,
+      email VARCHAR(190) NOT NULL UNIQUE,
+      password_hash VARCHAR(255) NOT NULL,
+      role VARCHAR(80) NOT NULL,
+      two_factor_enabled TINYINT(1) NOT NULL DEFAULT 1,
+      two_factor_code VARCHAR(20) DEFAULT NULL,
+      must_change_password TINYINT(1) NOT NULL DEFAULT 1,
+      active TINYINT(1) NOT NULL DEFAULT 1,
+      created_at DATETIME NOT NULL,
+      password_changed_at DATETIME DEFAULT NULL,
+      last_login_at DATETIME DEFAULT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS admin_password_history (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      admin_user_id INT UNSIGNED NOT NULL,
+      password_hash VARCHAR(255) NOT NULL,
+      created_at DATETIME NOT NULL,
+      INDEX idx_password_history_admin (admin_user_id)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS membership_applications (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      full_name VARCHAR(160) NOT NULL,
+      email VARCHAR(190) NOT NULL,
+      phone VARCHAR(80) NOT NULL,
+      membership_type VARCHAR(120) NOT NULL,
+      message TEXT,
+      status VARCHAR(40) NOT NULL DEFAULT 'New',
+      internal_notes TEXT,
+      created_at DATETIME NOT NULL,
+      updated_at DATETIME NOT NULL,
+      INDEX idx_membership_status (status),
+      INDEX idx_membership_created (created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS licensing_requests (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      full_name VARCHAR(160) NOT NULL,
+      email VARCHAR(190) NOT NULL,
+      affiliation VARCHAR(190) NOT NULL,
+      license_type VARCHAR(120) NOT NULL,
+      experience TEXT NOT NULL,
+      status VARCHAR(40) NOT NULL DEFAULT 'Received',
+      internal_notes TEXT,
+      created_at DATETIME NOT NULL,
+      updated_at DATETIME NOT NULL,
+      INDEX idx_licensing_status (status),
+      INDEX idx_licensing_created (created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS contact_messages (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      full_name VARCHAR(160) NOT NULL,
+      email VARCHAR(190) NOT NULL,
+      subject VARCHAR(190) NOT NULL,
+      message TEXT NOT NULL,
+      is_read TINYINT(1) NOT NULL DEFAULT 0,
+      archived TINYINT(1) NOT NULL DEFAULT 0,
+      created_at DATETIME NOT NULL,
+      INDEX idx_contact_read (is_read),
+      INDEX idx_contact_archived (archived),
+      INDEX idx_contact_created (created_at)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS training_modules (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      sort_order INT NOT NULL,
+      step_number INT NOT NULL,
+      title VARCHAR(160) NOT NULL,
+      description TEXT NOT NULL,
+      updated_at DATETIME NOT NULL,
+      INDEX idx_training_sort (sort_order)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS site_settings (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      setting_key VARCHAR(120) NOT NULL UNIQUE,
+      setting_value TEXT,
+      updated_at DATETIME NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS audit_log (
+      id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+      admin_email VARCHAR(190) NOT NULL,
+      action VARCHAR(120) NOT NULL,
+      details TEXT,
+      ip_address VARCHAR(80) NOT NULL,
+      created_at DATETIME NOT NULL,
+      INDEX idx_audit_created (created_at),
+      INDEX idx_audit_admin (admin_email)
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS login_attempts (
+      attempt_key VARCHAR(255) PRIMARY KEY,
+      attempts INT NOT NULL DEFAULT 0,
+      locked_until DATETIME DEFAULT NULL,
+      updated_at DATETIME NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    $pdo->exec("CREATE TABLE IF NOT EXISTS rate_limits (
+      rate_key VARCHAR(255) PRIMARY KEY,
+      attempts INT NOT NULL DEFAULT 0,
+      locked_until DATETIME DEFAULT NULL,
+      updated_at DATETIME NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci");
+
+    ensure_column($pdo, 'contact_messages', 'archived', "ALTER TABLE contact_messages ADD archived TINYINT(1) NOT NULL DEFAULT 0 AFTER is_read");
+    ensure_column($pdo, 'admin_users', 'last_login_at', "ALTER TABLE admin_users ADD last_login_at DATETIME DEFAULT NULL");
+    ensure_column($pdo, 'admin_users', 'password_changed_at', "ALTER TABLE admin_users ADD password_changed_at DATETIME DEFAULT NULL");
+
+    $adminCount = (int)$pdo->query('SELECT COUNT(*) FROM admin_users')->fetchColumn();
+    if ($adminCount === 0) {
+        $hash = '$2y$12$QDGG6faQsWpyZF7O1nQnSO6L6MqbYY9QlCheYqmY9Nyt1Zm/44z3K';
+        $stmt = $pdo->prepare('INSERT INTO admin_users (name, email, password_hash, role, two_factor_enabled, two_factor_code, must_change_password, active, created_at) VALUES (?, ?, ?, ?, 1, ?, 1, 1, NOW())');
+        $stmt->execute(['Newpath Super Admin', 'admin@newpathchaplaincy.com', $hash, 'Super Admin', '202626']);
+        $adminId = (int)$pdo->lastInsertId();
+        $stmt = $pdo->prepare('INSERT INTO admin_password_history (admin_user_id, password_hash, created_at) VALUES (?, ?, NOW())');
+        $stmt->execute([$adminId, $hash]);
+    }
+
+    $moduleCount = (int)$pdo->query('SELECT COUNT(*) FROM training_modules')->fetchColumn();
+    if ($moduleCount === 0) {
+        $stmt = $pdo->prepare('INSERT INTO training_modules (sort_order, step_number, title, description, updated_at) VALUES (?, ?, ?, ?, NOW())');
+        $modules = [
+            [1, 1, 'Foundations of Chaplaincy', 'Calling, ethics, confidentiality, presence, listening, and pastoral identity.'],
+            [2, 2, 'Crisis & Trauma Care', 'Emergency response, grief support, psychological first aid, and referral protocols.'],
+            [3, 3, 'Specialized Chaplaincy', 'Healthcare, military/veterans, corrections, community, workplace, and first-responder care.'],
+            [4, 4, 'Digital Chaplaincy', 'Online care, virtual ministry, secure records, and ethical technology use.'],
+        ];
+        foreach ($modules as $module) {
+            $stmt->execute($module);
+        }
+    }
+
+    $settings = [
+        'contact_email' => 'info@newpathchaplaincy.com',
+        'contact_phone' => '(000) 000-0000',
+    ];
+    $stmt = $pdo->prepare('INSERT INTO site_settings (setting_key, setting_value, updated_at) VALUES (?, ?, NOW()) ON DUPLICATE KEY UPDATE setting_key = setting_key');
+    foreach ($settings as $key => $value) {
+        $stmt->execute([$key, $value]);
+    }
+}
+
+function ensure_column(PDO $pdo, string $table, string $column, string $sql): void
+{
+    $stmt = $pdo->query("SHOW COLUMNS FROM {$table} LIKE " . $pdo->quote($column));
+    if (!$stmt->fetch()) {
+        $pdo->exec($sql);
+    }
 }
 
 function start_secure_session(): void
