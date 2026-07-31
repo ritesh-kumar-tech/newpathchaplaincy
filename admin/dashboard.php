@@ -28,6 +28,14 @@ admin_layout_start('Admin Dashboard', 'dashboard');
   <div class="metric"><span>Pending licensing</span><strong><?php echo h($metrics['pending_licenses']); ?></strong></div>
   <div class="metric"><span>Unread messages</span><strong><?php echo h($metrics['unread_messages']); ?></strong></div>
 </section>
+<section class="module-grid" aria-label="Admin modules">
+  <a class="module-card" href="membership.php"><strong>Membership Applications</strong><span>Review, search, update status, notes, export CSV.</span></a>
+  <a class="module-card" href="licensing.php"><strong>Licensing Requests</strong><span>Manage review pipeline and internal notes.</span></a>
+  <a class="module-card" href="messages.php"><strong>Contact Inbox</strong><span>Read, archive, delete, and reply by email.</span></a>
+  <a class="module-card" href="training.php"><strong>Training CMS</strong><span>Edit the public training cards instantly.</span></a>
+  <a class="module-card" href="settings.php"><strong>Settings</strong><span>Update profile and frontend contact details.</span></a>
+  <?php if (current_admin_role() === 'Super Admin'): ?><a class="module-card" href="admins.php"><strong>Admin Users</strong><span>Create, disable, enable, and reset admins.</span></a><a class="module-card" href="audit.php"><strong>Audit Log</strong><span>Search paginated security and action records.</span></a><?php endif; ?>
+</section>
 <section class="panel chart-panel"><h2>Applications Per Month</h2><canvas id="applicationsChart" data-labels='<?php echo h(json_encode(array_keys($months))); ?>' data-values='<?php echo h(json_encode(array_values($months))); ?>'></canvas></section>
 <br><section class="panel"><h2>Recent Activity</h2><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Date</th><th>Admin</th><th>Action</th><th>Details</th><th>IP</th></tr></thead><tbody><?php foreach ($activity as $row): ?><tr><td><?php echo h($row['created_at']); ?></td><td><?php echo h($row['admin_email']); ?></td><td><?php echo h($row['action']); ?></td><td><?php echo h($row['details']); ?></td><td><?php echo h($row['ip_address']); ?></td></tr><?php endforeach; ?></tbody></table></div></section>
 <?php admin_layout_end(); ?>

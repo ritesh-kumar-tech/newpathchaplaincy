@@ -27,7 +27,7 @@ if ($errors) {
     json_response(['ok' => false, 'message' => 'Please correct the highlighted fields.', 'errors' => $errors], 422);
 }
 
-$stmt = db()->prepare('INSERT INTO contact_messages (full_name, email, subject, message, is_read, created_at) VALUES (?, ?, ?, ?, 0, NOW())');
+$stmt = db()->prepare('INSERT INTO contact_messages (full_name, email, subject, message, is_read, archived, created_at) VALUES (?, ?, ?, ?, 0, 0, NOW())');
 $stmt->execute([
     clean_text($data['full_name'], 160),
     clean_text($data['email'], 190),

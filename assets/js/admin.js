@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sidebar?.classList.toggle('open');
       return;
     }
-    document.body.classList.toggle('admin-expanded');
+    document.body.classList.toggle('admin-collapsed');
   });
 
   document.addEventListener('click', (event) => {
@@ -50,4 +50,15 @@ document.addEventListener('DOMContentLoaded', () => {
   if (params.has('updated') || params.has('saved') || params.has('password_changed')) {
     document.querySelector('.admin-table tbody tr, .panel')?.classList.add('updated');
   }
+
+  const globalSearch = document.querySelector('.global-search');
+  globalSearch?.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter') return;
+    const value = globalSearch.value.trim();
+    if (!value) return;
+    const path = window.location.pathname.split('/').pop() || 'dashboard.php';
+    const searchable = ['membership.php', 'licensing.php', 'messages.php', 'audit.php'];
+    const target = searchable.includes(path) ? path : 'membership.php';
+    window.location.href = `${target}?q=${encodeURIComponent(value)}`;
+  });
 });
