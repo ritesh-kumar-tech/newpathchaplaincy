@@ -173,6 +173,25 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  document.querySelectorAll('form[data-newsletter]').forEach((form) => {
+    form.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const input = form.querySelector('input[type="email"]');
+      const note = form.querySelector('.newsletter-note');
+      const email = String(input?.value || '').trim();
+      note.classList.remove('success');
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        note.textContent = 'Enter a valid email address to subscribe.';
+        input?.focus();
+        return;
+      }
+      note.textContent = 'Thank you. You are on the ministry updates list.';
+      note.classList.add('success');
+      form.reset();
+      showToast('Thank you. You are on the ministry updates list.');
+    });
+  });
+
   document.querySelectorAll('.progressive-form').forEach((form) => {
     const steps = [...form.querySelectorAll('.form-step')];
     const dots = [...form.querySelectorAll('.step-dots span')];
