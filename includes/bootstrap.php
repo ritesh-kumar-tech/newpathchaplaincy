@@ -72,9 +72,9 @@ function ensure_app_schema(PDO $pdo): void
       email VARCHAR(190) NOT NULL UNIQUE,
       password_hash VARCHAR(255) NOT NULL,
       role VARCHAR(80) NOT NULL,
-      two_factor_enabled TINYINT(1) NOT NULL DEFAULT 1,
+      two_factor_enabled TINYINT(1) NOT NULL DEFAULT 0,
       two_factor_code VARCHAR(20) DEFAULT NULL,
-      must_change_password TINYINT(1) NOT NULL DEFAULT 1,
+      must_change_password TINYINT(1) NOT NULL DEFAULT 0,
       active TINYINT(1) NOT NULL DEFAULT 1,
       created_at DATETIME NOT NULL,
       password_changed_at DATETIME DEFAULT NULL,
@@ -182,8 +182,8 @@ function ensure_app_schema(PDO $pdo): void
     $adminCount = (int)$pdo->query('SELECT COUNT(*) FROM admin_users')->fetchColumn();
     if ($adminCount === 0) {
         $hash = '$2y$12$QDGG6faQsWpyZF7O1nQnSO6L6MqbYY9QlCheYqmY9Nyt1Zm/44z3K';
-        $stmt = $pdo->prepare('INSERT INTO admin_users (name, email, password_hash, role, two_factor_enabled, two_factor_code, must_change_password, active, created_at) VALUES (?, ?, ?, ?, 1, ?, 1, 1, NOW())');
-        $stmt->execute(['Newpath Super Admin', 'admin@newpathchaplaincy.com', $hash, 'Super Admin', '202626']);
+        $stmt = $pdo->prepare('INSERT INTO admin_users (name, email, password_hash, role, must_change_password, active, created_at, password_changed_at) VALUES (?, ?, ?, ?, 0, 1, NOW(), NOW())');
+        $stmt->execute(['Newpath Super Admin', 'admin@newpathchaplaincy.com', $hash, 'Super Admin']);
         $adminId = (int)$pdo->lastInsertId();
         $stmt = $pdo->prepare('INSERT INTO admin_password_history (admin_user_id, password_hash, created_at) VALUES (?, ?, NOW())');
         $stmt->execute([$adminId, $hash]);

@@ -1,18 +1,36 @@
 document.addEventListener('DOMContentLoaded', () => {
   const menuButton = document.querySelector('.admin-menu-button');
   const sidebar = document.querySelector('.sidebar');
+  const overlay = document.querySelector('.admin-overlay');
+  const isMobile = () => window.matchMedia('(max-width: 760px)').matches;
+
+  const closeSidebar = () => {
+    sidebar?.classList.remove('open');
+    overlay?.classList.remove('show');
+    document.body.classList.remove('admin-drawer-open');
+    menuButton?.setAttribute('aria-expanded', 'false');
+  };
+
+  const openSidebar = () => {
+    sidebar?.classList.add('open');
+    overlay?.classList.add('show');
+    document.body.classList.add('admin-drawer-open');
+    menuButton?.setAttribute('aria-expanded', 'true');
+    sidebar?.querySelector('a')?.focus({ preventScroll: true });
+  };
+
   menuButton?.addEventListener('click', () => {
-    if (window.matchMedia('(max-width: 760px)').matches) {
-      sidebar?.classList.toggle('open');
+    if (isMobile()) {
+      sidebar?.classList.contains('open') ? closeSidebar() : openSidebar();
       return;
     }
     document.body.classList.toggle('admin-collapsed');
   });
 
-  document.addEventListener('click', (event) => {
-    if (!sidebar?.classList.contains('open')) return;
-    if (sidebar.contains(event.target) || menuButton.contains(event.target)) return;
-    sidebar.classList.remove('open');
+  overlay?.addEventListener('click', closeSidebar);
+  sidebar?.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeSidebar));
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') closeSidebar();
   });
 
   const chart = document.getElementById('applicationsChart');
@@ -51,14 +69,40 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelector('.admin-table tbody tr, .panel')?.classList.add('updated');
   }
 
-  const globalSearch = document.querySelector('.global-search');
-  globalSearch?.addEventListener('keydown', (event) => {
-    if (event.key !== 'Enter') return;
-    const value = globalSearch.value.trim();
-    if (!value) return;
-    const path = window.location.pathname.split('/').pop() || 'dashboard.php';
-    const searchable = ['membership.php', 'licensing.php', 'messages.php', 'audit.php'];
-    const target = searchable.includes(path) ? path : 'membership.php';
-    window.location.href = `${target}?q=${encodeURIComponent(value)}`;
+  document.querySelectorAll('.password-toggle').forEach((button) => {
+    button.addEventListener('click', () => {
+      const input = button.closest('.password-input')?.querySelector('input');
+      if (!input) return;
+      const show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      button.textContent = show ? 'Hide' : 'Show';
+      button.setAttribute('aria-label', `${show ? 'Hide' : 'Show'} password`);
+    });
+  });
+
+  const newPassword = document.querySelector('input[name="new_password"]');
+  const rules = document.querySelectorAll('.password-rules [data-rule]');
+  const updateRules = () => {
+    const value = newPassword?.value || '';
+    const checks = {
+      length: value.length >= 12,
+      upper: /[A-Z]/.test(value),
+      lower: /[a-z]/.test(value),
+      number: /[0-9]/.test(value),
+      special: /[^A-Za-z0-9]/.test(value),
+    };
+    rules.forEach((rule) => rule.classList.toggle('met', Boolean(checks[rule.dataset.rule])));
+  };
+  newPassword?.addEventListener('input', updateRules);
+  updateRules();
+
+  document.querySelectorAll('form[data-prevent-duplicate], .admin-form').forEach((form) => {
+    form.addEventListener('submit', () => {
+      const button = form.querySelector('button[type="submit"], button:not([type]), button[name="action"]:focus');
+      if (!button || button.disabled) return;
+      button.dataset.originalText = button.textContent;
+      button.textContent = button.dataset.loadingText || 'Working...';
+      button.disabled = true;
+    });
   });
 });

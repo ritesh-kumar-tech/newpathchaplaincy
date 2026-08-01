@@ -39,18 +39,22 @@ function remember_admin_password(int $adminId, string $hash): void
     $stmt->execute([$adminId, $hash]);
 }
 
+function login_attempt_key(string $email): string
+{
+    return 'login|' . hash('sha256', strtolower(trim($email))) . '|' . client_ip();
+}
+
 function is_locked_out(string $email): bool
 {
-    $key = 'login|' . strtolower(trim($email)) . '|' . client_ip();
     $stmt = db()->prepare('SELECT locked_until FROM login_attempts WHERE attempt_key = ? LIMIT 1');
-    $stmt->execute([$key]);
+    $stmt->execute([login_attempt_key($email)]);
     $lockedUntil = $stmt->fetchColumn();
     return $lockedUntil !== false && $lockedUntil !== null && strtotime((string)$lockedUntil) > time();
 }
 
 function record_failed_login(string $email): void
 {
-    $key = 'login|' . strtolower(trim($email)) . '|' . client_ip();
+    $key = login_attempt_key($email);
     $stmt = db()->prepare('SELECT attempts, updated_at FROM login_attempts WHERE attempt_key = ? LIMIT 1');
     $stmt->execute([$key]);
     $row = $stmt->fetch();
@@ -59,33 +63,14 @@ function record_failed_login(string $email): void
     $stmt = db()->prepare('REPLACE INTO login_attempts (attempt_key, attempts, locked_until, updated_at) VALUES (?, ?, ?, NOW())');
     $stmt->execute([$key, $attempts, $lockedUntil]);
     if ($lockedUntil) {
-        audit_log('LOCKOUT_TRIGGERED', strtolower(trim($email)), strtolower(trim($email)));
+        audit_log('LOCKOUT_TRIGGERED', 'login rate limit reached', strtolower(trim($email)));
     }
 }
 
 function clear_failed_login(string $email): void
 {
-    $key = 'login|' . strtolower(trim($email)) . '|' . client_ip();
     $stmt = db()->prepare('DELETE FROM login_attempts WHERE attempt_key = ?');
-    $stmt->execute([$key]);
-}
-
-function captcha_question(): string
-{
-    if (!isset($_SESSION['captcha_answer'])) {
-        $a = random_int(2, 9);
-        $b = random_int(2, 9);
-        $_SESSION['captcha_answer'] = (string)($a + $b);
-        $_SESSION['captcha_question'] = $a . ' + ' . $b;
-    }
-    return $_SESSION['captcha_question'];
-}
-
-function verify_captcha(string $answer): bool
-{
-    $ok = isset($_SESSION['captcha_answer']) && hash_equals($_SESSION['captcha_answer'], trim($answer));
-    unset($_SESSION['captcha_answer'], $_SESSION['captcha_question']);
-    return $ok;
+    $stmt->execute([login_attempt_key($email)]);
 }
 
 function ip_allowed(): bool
@@ -115,13 +100,7 @@ function password_reused(string $password, array $history): bool
 
 function admin_password_expired(array $user): bool
 {
-    if (!empty($user['must_change_password'])) {
-        return true;
-    }
-    if (empty($user['password_changed_at'])) {
-        return false;
-    }
-    return strtotime((string)$user['password_changed_at']) < strtotime('-' . PASSWORD_EXPIRY_DAYS . ' days');
+    return !empty($user['must_change_password']);
 }
 
 function is_admin_logged_in(): bool
@@ -145,6 +124,13 @@ function require_admin(bool $allowPasswordChange = false): void
         header('Location: login.php');
         exit;
     }
+    $user = find_admin_by_id((int)($_SESSION['admin_id'] ?? 0));
+    if ($user) {
+        $_SESSION['must_change_password'] = admin_password_expired($user);
+        $_SESSION['admin_role'] = $user['role'];
+        $_SESSION['admin_name'] = $user['name'];
+        $_SESSION['admin_email'] = $user['email'];
+    }
     if (!$allowPasswordChange && !empty($_SESSION['must_change_password'])) {
         header('Location: change_password.php');
         exit;
@@ -160,8 +146,7 @@ function require_role(array $allowedRoles): void
 {
     require_admin();
     if (!in_array(current_admin_role(), $allowedRoles, true)) {
-        http_response_code(403);
-        echo 'Access denied for this admin role.';
+        admin_error_page('Access denied', 'You do not have permission to open this admin page.', 403);
         exit;
     }
 }
@@ -209,13 +194,13 @@ function admin_nav(string $active): string
         $class = $active === $key ? ' class="active"' : '';
         $html .= '<a' . $class . ' href="' . h($href) . '" data-icon="' . h($icon) . '"><span class="nav-label">' . h($label) . '</span></a>';
     }
-    return $html . '<a href="../index.html" data-icon="W"><span class="nav-label">View Website</span></a><a href="logout.php" data-icon="Q"><span class="nav-label">Logout</span></a>';
+    return $html . '<a href="../index.html" target="_blank" rel="noopener" data-icon="W"><span class="nav-label">View Website</span></a><a href="logout.php" data-icon="Q"><span class="nav-label">Logout</span></a>';
 }
 
 function admin_layout_start(string $title, string $active = ''): void
 {
     $initials = strtoupper(substr((string)($_SESSION['admin_name'] ?? 'A'), 0, 1));
-    echo '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="noindex,nofollow"><title>' . h($title) . '</title><link rel="stylesheet" href="../assets/css/styles.css"><script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script><script defer src="../assets/js/admin.js"></script></head><body class="admin-body"><div class="admin-shell"><aside class="sidebar"><div class="side-brand"><img src="../assets/img/logo.png" alt="Logo"><h2>NGCN Admin</h2></div><p>' . h($_SESSION['admin_name'] ?? '') . '<br><span>' . h(current_admin_role()) . '</span></p><nav>' . admin_nav($active) . '</nav></aside><header class="admin-topbar"><div class="admin-left"><button class="admin-menu-button" type="button" aria-label="Toggle admin menu">☰</button><div><div class="breadcrumb">' . h($title) . '</div><small>' . h(date('M j, Y')) . '</small></div></div><input class="global-search" type="search" placeholder="Search this workspace" aria-label="Global search"><div class="admin-avatar"><span>' . h($initials) . '</span><strong>' . h($_SESSION['admin_name'] ?? 'Admin') . '</strong></div></header><main class="admin-main">';
+    echo '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="noindex,nofollow"><title>' . h($title) . '</title><link rel="stylesheet" href="../assets/css/styles.css"><script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script><script defer src="../assets/js/admin.js"></script></head><body class="admin-body"><div class="admin-overlay" tabindex="-1"></div><div class="admin-shell"><aside class="sidebar" id="adminSidebar"><div class="side-brand"><img src="../assets/img/logo.png" alt="Logo"><h2>NGCN Admin</h2></div><p>' . h($_SESSION['admin_name'] ?? '') . '<br><span>' . h(current_admin_role()) . '</span></p><nav>' . admin_nav($active) . '</nav></aside><header class="admin-topbar"><div class="admin-left"><button class="admin-menu-button" type="button" aria-label="Toggle admin menu" aria-controls="adminSidebar" aria-expanded="false">☰</button><div><div class="breadcrumb">' . h($title) . '</div><small>' . h(date('M j, Y')) . '</small></div></div><div class="admin-avatar"><span>' . h($initials) . '</span><strong>' . h($_SESSION['admin_name'] ?? 'Admin') . '</strong></div></header><main class="admin-main">';
 }
 
 function admin_layout_end(): void
@@ -226,5 +211,27 @@ function admin_layout_end(): void
 function query_params(array $overrides): string
 {
     return http_build_query(array_merge($_GET, $overrides));
+}
+
+function pagination_links(string $base, int $page, int $pages, array $params = []): string
+{
+    if ($pages <= 1) {
+        return '';
+    }
+    $html = '<nav class="pagination" aria-label="Pagination">';
+    for ($i = 1; $i <= $pages; $i++) {
+        $query = http_build_query(array_merge($params, ['page' => $i]));
+        $class = $i === $page ? ' class="active"' : '';
+        $html .= '<a' . $class . ' href="' . h($base . '?' . $query) . '">' . h($i) . '</a>';
+    }
+    return $html . '</nav>';
+}
+
+function admin_error_page(string $title, string $message, int $status = 400): void
+{
+    http_response_code($status);
+    admin_layout_start($title, '');
+    echo '<section class="panel empty-state"><h1>' . h($title) . '</h1><p>' . h($message) . '</p><a class="btn primary" href="dashboard.php">Back to Dashboard</a></section>';
+    admin_layout_end();
 }
 ?>

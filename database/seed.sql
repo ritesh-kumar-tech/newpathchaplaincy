@@ -1,5 +1,5 @@
-INSERT INTO admin_users (name, email, password_hash, role, two_factor_enabled, two_factor_code, must_change_password, active, created_at, password_changed_at, last_login_at)
-VALUES ('Newpath Super Admin', 'admin@newpathchaplaincy.com', '$2y$12$QDGG6faQsWpyZF7O1nQnSO6L6MqbYY9QlCheYqmY9Nyt1Zm/44z3K', 'Super Admin', 1, '202626', 1, 1, NOW(), NULL, NULL)
+INSERT INTO admin_users (name, email, password_hash, role, must_change_password, active, created_at, password_changed_at, last_login_at)
+VALUES ('Newpath Super Admin', 'admin@newpathchaplaincy.com', '$2y$12$QDGG6faQsWpyZF7O1nQnSO6L6MqbYY9QlCheYqmY9Nyt1Zm/44z3K', 'Super Admin', 0, 1, NOW(), NOW(), NULL)
 ON DUPLICATE KEY UPDATE email = email;
 
 INSERT INTO admin_password_history (admin_user_id, password_hash, created_at)

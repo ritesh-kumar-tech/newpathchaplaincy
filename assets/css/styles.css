@@ -151,3 +151,22 @@ body:not(.admin-body) .footer-news input{flex:1;border:1px solid rgba(255,255,25
 .public-site footer{background:#111821!important;color:#cbd2dc!important}
 @media(max-width:1060px){.public-site .hero-stage,.public-site .membership-shell,.public-site .licensing-shell,.public-site .contact-shell,.public-site .admin-preview,.public-site .footer-news{grid-template-columns:1fr!important}.public-site .hero-stage{grid-template-areas:"copy" "card" "stats"!important}.public-site .about-bento,.public-site .training-roadmap,.public-site .hero-stats{grid-template-columns:repeat(2,1fr)!important}}
 @media(max-width:760px){.public-site .hero{padding:30px 0 46px!important}.public-site .hero h1{font-size:clamp(2.35rem,14vw,3.55rem)!important}.public-site .about-bento,.public-site .training-roadmap,.public-site .hero-stats{grid-template-columns:1fr!important}.public-site .section{padding:72px 0!important}.public-site .hero-actions{display:grid!important}.public-site .hero-actions .btn{width:100%!important}.public-site .form-card input,.public-site .form-card select,.public-site .form-card textarea{font-size:16px!important}}
+
+/* Admin production fixes */
+.admin-body{overflow-x:hidden}
+.admin-overlay{display:none}
+.admin-drawer-open{overflow:hidden}
+.admin-table-wrap{max-width:100%}
+.metric{color:inherit}
+.empty-state{max-width:760px}
+.field-message{color:#b91c1c;font-size:.86rem;font-weight:800}
+.password-input{display:grid;grid-template-columns:1fr auto;align-items:stretch;border:1px solid var(--line);border-radius:8px;background:#fff;overflow:hidden}
+.password-input input{border:0!important;border-radius:0!important}
+.password-toggle{border:0;border-left:1px solid var(--line);background:#f8fafc;padding:0 14px;font-weight:900;cursor:pointer}
+.password-rules{list-style:none;padding:0;margin:22px 0 0;display:grid;gap:10px}
+.password-rules li{color:#d1d5db;font-weight:800}
+.password-rules li:before{content:"";display:inline-block;width:10px;height:10px;margin-right:10px;border-radius:50%;background:#6b7280}
+.password-rules li.met:before{background:#22c55e}
+.audit-toolbar{grid-template-columns:1.2fr 1fr 220px 170px auto}
+@media(max-width:980px){.audit-toolbar,.toolbar{grid-template-columns:1fr 1fr}.toolbar .btn,.audit-toolbar .btn{grid-column:1/-1}}
+@media(max-width:760px){.admin-overlay.show{display:block;position:fixed;inset:0;z-index:29;background:rgba(5,8,13,.55)}.sidebar{z-index:31;width:min(320px,86vw);right:auto!important}.admin-avatar strong{display:none}.admin-table-wrap{overflow:visible}.admin-table{min-width:0;border-collapse:separate;border-spacing:0 14px}.admin-table thead{display:none}.admin-table,.admin-table tbody,.admin-table tr,.admin-table td{display:block;width:100%}.admin-table tr{border:1px solid var(--line);border-radius:8px;background:#fff;box-shadow:0 10px 28px rgba(17,24,39,.06);overflow:hidden}.admin-table td{border-bottom:1px solid var(--line);padding:12px 14px 12px 42%;position:relative}.admin-table td:last-child{border-bottom:0}.admin-table td:before{content:attr(data-label);position:absolute;left:14px;top:12px;width:34%;color:var(--muted);font-size:.78rem;font-weight:900;text-transform:uppercase}.admin-table td[colspan]:before{display:none}.admin-table td[colspan]{padding-left:14px}.security-card{margin:0}.toolbar,.audit-toolbar{grid-template-columns:1fr}}
