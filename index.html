@@ -28,7 +28,6 @@
 
   <main id="home">
     <section class="hero section-observed">
-      <div class="hero-orb orb-one"></div><div class="hero-orb orb-two"></div>
       <div class="container hero-stage">
         <div class="hero-copy reveal">
           <p class="eyebrow">Serve | Care | Support | newpathchaplaincy.com</p>
@@ -51,11 +50,28 @@
     </section>
 
     <section id="about" class="section container section-observed">
-      <div class="section-title reveal"><p>About Us</p><h2>A chaplaincy network built for today's digital world.</h2><span class="section-copy">A structured ministry platform for chaplains called to serve with compassion, readiness, and accountability.</span></div>
-      <div class="about-bento">
-        <article class="reveal bento-large"><svg viewBox="0 0 24 24"><path d="M12 3v18M6 8h12M8 21h8"></path></svg><span>01</span><h3>Mission</h3><p>To train, connect, credential, and support chaplains who bring spiritual care, emotional support, and practical hope to people in crisis.</p></article>
-        <article class="reveal"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg><span>02</span><h3>Vision</h3><p>To build a global community of qualified chaplains serving with compassion, integrity, cultural wisdom, and technological readiness.</p></article>
-        <article class="reveal"><svg viewBox="0 0 24 24"><path d="m12 3 8 4v5c0 5-3.4 8.5-8 9-4.6-.5-8-4-8-9V7l8-4Z"></path><path d="m9 12 2 2 4-5"></path></svg><span>03</span><h3>Core Values</h3><p>Faith, confidentiality, excellence, servant leadership, emergency readiness, accountability, and care for all people.</p></article>
+      <div class="section-title centered reveal"><p>About Us</p><h2>A chaplaincy network built for today's digital world.</h2><span class="section-copy">A structured ministry platform for chaplains called to serve with compassion, readiness, and accountability.</span></div>
+      <div class="about-story">
+        <aside class="mission-panel reveal"><span>Global ministry with practical care</span><h3>Training, connecting, credentialing, and supporting chaplains for moments that matter.</h3><p>Newpath brings spiritual care, emotional support, and practical hope into communities, institutions, and crisis environments.</p></aside>
+        <div class="about-rows">
+          <article class="reveal"><svg viewBox="0 0 24 24"><path d="M12 3v18M6 8h12M8 21h8"></path></svg><span>01</span><div><h3>Mission</h3><p>To train, connect, credential, and support chaplains who bring spiritual care, emotional support, and practical hope to people in crisis.</p></div></article>
+          <article class="reveal"><svg viewBox="0 0 24 24"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12Z"></path><circle cx="12" cy="12" r="3"></circle></svg><span>02</span><div><h3>Vision</h3><p>To build a global community of qualified chaplains serving with compassion, integrity, cultural wisdom, and technological readiness.</p></div></article>
+          <article class="reveal"><svg viewBox="0 0 24 24"><path d="m12 3 8 4v5c0 5-3.4 8.5-8 9-4.6-.5-8-4-8-9V7l8-4Z"></path><path d="m9 12 2 2 4-5"></path></svg><span>03</span><div><h3>Core Values</h3><p>Faith, confidentiality, excellence, servant leadership, emergency readiness, accountability, and care for all people.</p></div></article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section serve-section section-observed">
+      <div class="container">
+        <div class="section-title centered reveal"><p>Who We Serve</p><h2>Prepared for care across every setting.</h2><span class="section-copy">Newpath supports chaplains serving people and institutions through training, membership, licensing, and digital ministry readiness.</span></div>
+        <div class="serve-grid">
+          <article class="reveal"><span>01</span><h3>Churches and Ministries</h3><p>Supporting ministry leaders with chaplaincy training and credentialing pathways.</p></article>
+          <article class="reveal"><span>02</span><h3>Communities</h3><p>Equipping servant leaders to bring care, presence, and practical support.</p></article>
+          <article class="reveal"><span>03</span><h3>Hospitals and Crisis Support</h3><p>Preparing chaplains for sensitive environments shaped by grief and urgent need.</p></article>
+          <article class="reveal"><span>04</span><h3>Correctional and Public Service</h3><p>Serving institutions with accountability, confidentiality, and pastoral wisdom.</p></article>
+          <article class="reveal"><span>05</span><h3>Digital Communities</h3><p>Building readiness for ethical online care and secure ministry communication.</p></article>
+          <article class="reveal"><span>06</span><h3>Global Ministry Leaders</h3><p>Connecting faith-centered leaders through a shared professional network.</p></article>
+        </div>
       </div>
     </section>
 
@@ -87,6 +103,7 @@
 
     <section id="licensing" class="section light licensing-studio section-observed">
       <div class="container licensing-shell">
+        <div class="license-context reveal"><p class="eyebrow">Ministerial Licensing</p><h2>Credentialing with accountability and purpose.</h2><p>The licensing pathway can include application review, ministry verification, ethics agreement, training completion, interview, and annual renewal.</p><ol class="process-list"><li><strong>01 Apply</strong><span>Submit your application and ministry information.</span></li><li><strong>02 Review</strong><span>The administrative team reviews the application.</span></li><li><strong>03 Verify</strong><span>Documents, ministry background, and required information are verified.</span></li><li><strong>04 Decision</strong><span>Approval, follow-up, or additional requirements are communicated.</span></li></ol><ul class="checklist"><li>Online application intake</li><li>Document upload-ready structure</li><li>Admin review dashboard</li><li>Approval and follow-up workflow</li></ul></div>
         <form class="form-card licensing-form reveal" data-form="licensing" data-endpoint="api/licensing.php" novalidate>
           <h3>Licensing Inquiry</h3>
           <input type="hidden" name="csrf_token"><input class="hp" name="website" tabindex="-1" autocomplete="off">
@@ -97,13 +114,19 @@
           <label><span>Ministry Experience</span><textarea required name="experience"></textarea></label>
           <button class="btn primary" type="submit"><span>Request Review</span></button><p class="form-note" role="status"></p>
         </form>
-        <div class="license-context reveal"><p class="eyebrow">Ministerial Licensing</p><h2>Credentialing with accountability and purpose.</h2><p>The licensing pathway can include application review, ministry verification, ethics agreement, training completion, interview, and annual renewal.</p><ol class="process-list"><li><strong>Apply</strong><span>Submit ministry and credential details.</span></li><li><strong>Review</strong><span>Administrative review and follow-up.</span></li><li><strong>Decision</strong><span>Approval, denial, or renewal pathway.</span></li></ol><ul class="checklist"><li>Online application intake</li><li>Document upload-ready structure</li><li>Admin review dashboard</li><li>Approval and follow-up workflow</li></ul></div>
       </div>
     </section>
 
     <section class="section container dashboard-preview section-observed">
-      <div class="section-title reveal"><p>Administrative Back-End</p><h2>Included admin interface for site management.</h2></div>
+      <div class="section-title centered reveal"><p>Administrative Back-End</p><h2>Included admin interface for site management.</h2><span class="section-copy">A working back office for reviewing applications, licensing workflows, messages, training content, settings, administrator access, and audit history.</span></div>
       <div class="admin-preview reveal"><div class="preview-copy"><h3>Live back office for intake and review.</h3><p>Dashboard metrics, membership applications, licensing workflow, contact inbox, training content, settings, administrator access, and audit logs.</p><a class="btn secondary magnetic" href="admin/login.php">View Admin Portal</a></div><div class="mock-product" aria-hidden="true"><aside><b></b><span></span><span></span><span></span><span></span></aside><main><div class="mock-top"><span></span><strong></strong></div><div class="mock-metrics"><span><b>1,482</b><em>Members</em></span><span><b>28</b><em>Pending</em></span><span><b>94%</b><em>Training</em></span></div><div class="mock-workspace"><div class="mock-table"><i></i><i></i><i></i><i></i></div><div class="mock-chart"><i></i><i></i><i></i><i></i><i></i></div></div><div class="mock-floating"><b></b><span></span></div></main></div></div>
+    </section>
+
+    <section class="primary-cta section-observed">
+      <div class="container cta-panel reveal">
+        <div><p class="eyebrow">Serve | Lead | Care</p><h2>Ready to serve, lead, and make a meaningful impact?</h2><p>Join a global network committed to compassionate service, professional development, and faith-based leadership.</p></div>
+        <div class="hero-actions"><a class="btn secondary" href="#membership">Become a Member</a><a class="btn primary" href="#training">Explore Training</a></div>
+      </div>
     </section>
 
     <section id="contact" class="section dark contact-dock section-observed">
@@ -121,7 +144,7 @@
       </div>
     </section>
   </main>
-  <footer><div class="container footer-news"><div><p class="eyebrow">Chaplaincy Network Bulletin</p><h3>Stay Connected with Global Ministry Updates</h3><p>Subscribe to receive credentialing updates, CEU course announcements, crisis response bulletins, and annual summit details directly to your inbox.</p><small>No spam. Ministry updates only.</small></div><form><input type="email" placeholder="Enter your email address" aria-label="Newsletter email"><button class="btn primary" type="button">Subscribe</button></form></div><div class="container footer-main"><div><a class="brand footer-brand" href="#home"><img src="assets/img/logo.png" alt="Newpath Global Chaplaincy Network logo"><span>Newpath Global<br>Chaplaincy Network</span></a><p>Equipping, training, and credentialing faith-centered chaplains for compassionate service across communities.</p></div><nav><strong>Navigation</strong><a href="#about">About Us</a><a href="#membership">Become a Member</a><a href="#training">Training</a><a href="#licensing">Ministerial Licensing</a></nav><nav><strong>Connect</strong><a href="#contact">Contact Us</a><a href="admin/login.php">Admin Login</a><span data-setting="contact_email">info@newpathchaplaincy.com</span><span data-setting="contact_phone">(000) 000-0000</span></nav></div><div class="container footer-grid"><p>&copy; <span id="year"></span> Newpath Global Chaplaincy Network. All rights reserved.</p><p>Serve | Care | Support</p></div></footer>
+  <footer><div class="container footer-news"><div><p class="eyebrow">Chaplaincy Network Bulletin</p><h3>Stay Connected with Global Ministry Updates</h3><p>Subscribe to receive credentialing updates, CEU course announcements, crisis response bulletins, and annual summit details directly to your inbox.</p><small>No spam. Ministry updates only.</small></div><form><input type="email" placeholder="Enter your email address" aria-label="Newsletter email"><button class="btn primary" type="button">Subscribe</button></form></div><div class="container footer-main"><div><a class="brand footer-brand" href="#home"><img src="assets/img/logo.png" alt="Newpath Global Chaplaincy Network logo"><span>Newpath Global<br>Chaplaincy Network</span></a><p>Equipping, training, and credentialing faith-centered chaplains for compassionate service across communities.</p></div><nav><strong>Main Navigation</strong><a href="#about">About Us</a><a href="#membership">Become a Member</a><a href="#training">Training</a><a href="#contact">Contact Us</a></nav><nav><strong>Programs</strong><a href="#membership">Membership</a><a href="#training">Training</a><a href="#licensing">Ministerial Licensing</a><a href="admin/login.php">Admin Login</a></nav><nav><strong>Contact</strong><span>newpathchaplaincy.com</span><span data-setting="contact_email">info@newpathchaplaincy.com</span><span data-setting="contact_phone">(000) 000-0000</span></nav></div><div class="container footer-grid"><p>&copy; <span id="year"></span> Newpath Global Chaplaincy Network. All rights reserved.</p><p>Serve | Care | Support</p></div></footer>
   <div class="toast" role="status" aria-live="polite"></div>
 </body>
 </html>
