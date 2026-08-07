@@ -171,20 +171,70 @@ function role_can(string $module): bool
     };
 }
 
+function admin_icon(string $key): string
+{
+    $paths = [
+        'dashboard' => '<path d="M4 5h7v7H4V5Zm9 0h7v14h-7V5ZM4 14h7v5H4v-5Z"/>',
+        'membership' => '<path d="M8 11a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7Zm8 0a3.5 3.5 0 1 1 0-7 3.5 3.5 0 0 1 0 7ZM3 20c.3-3.1 2.4-5 5-5s4.7 1.9 5 5H3Zm10 0c.2-1.7.9-3.1 2-4 .4-.2.8-.3 1.3-.3 2.4 0 4.4 1.7 4.7 4.3h-8Z"/>',
+        'licensing' => '<path d="M6 2h9l5 5v15H6V2Zm8 1.5V8h4.5L14 3.5ZM8 12h10v2H8v-2Zm0 4h7v2H8v-2Z"/>',
+        'messages' => '<path d="M3 5h18v14H3V5Zm2 3.2V17h14V8.2l-7 4.4-7-4.4ZM6.3 7l5.7 3.6L17.7 7H6.3Z"/>',
+        'training' => '<path d="M4 4h16v13H7l-3 3V4Zm3 4h10V6H7v2Zm0 4h7v-2H7v2Z"/>',
+        'settings' => '<path d="M12 8a4 4 0 1 1 0 8 4 4 0 0 1 0-8Zm8.6 5.5c.1-.5.1-1 .1-1.5s0-1-.1-1.5l2-1.5-2-3.5-2.4 1a8 8 0 0 0-2.5-1.5L15.3 2h-6.6l-.4 3a8 8 0 0 0-2.5 1.5l-2.4-1-2 3.5 2 1.5A8.7 8.7 0 0 0 3.3 12c0 .5 0 1 .1 1.5l-2 1.5 2 3.5 2.4-1a8 8 0 0 0 2.5 1.5l.4 3h6.6l.4-3a8 8 0 0 0 2.5-1.5l2.4 1 2-3.5-2-1.5Z"/>',
+        'admins' => '<path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm-8 8c0-3.3 3.6-6 8-6s8 2.7 8 6H4Zm15-8v-2h-2V8h2V6h2v2h2v2h-2v2h-2Z"/>',
+        'audit' => '<path d="M5 3h14v18H5V3Zm3 4h8V5H8v2Zm0 4h8V9H8v2Zm0 4h5v-2H8v2Z"/>',
+        'website' => '<path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm6.9 9h-3.1a15 15 0 0 0-1.1-5 8.1 8.1 0 0 1 4.2 5ZM12 4.1c.7 1 1.4 2.9 1.7 4.9h-3.4c.3-2 1-3.9 1.7-4.9ZM4.3 13h3.1c.1 1.8.5 3.5 1.1 5a8.1 8.1 0 0 1-4.2-5Zm3.1-2H4.3a8.1 8.1 0 0 1 4.2-5 15 15 0 0 0-1.1 5Zm4.6 8.9c-.7-1-1.4-2.9-1.7-4.9h3.4c-.3 2-1 3.9-1.7 4.9Zm2.1-6.9H9.9a12.8 12.8 0 0 1 0-2h4.2a12.8 12.8 0 0 1 0 2Zm1.4 5c.6-1.5 1-3.2 1.1-5h3.1a8.1 8.1 0 0 1-4.2 5Z"/>',
+        'logout' => '<path d="M10 3h9v18h-9v-2h7V5h-7V3Zm-1 5 1.4 1.4L8.8 11H21v2H8.8l1.6 1.6L9 16l-4-4 4-4Z"/>',
+    ];
+    return '<svg class="nav-svg" aria-hidden="true" viewBox="0 0 24 24" focusable="false">' . ($paths[$key] ?? $paths['dashboard']) . '</svg>';
+}
+
+function readable_action(string $action): string
+{
+    $known = [
+        'LOGIN_SUCCESS' => 'Login Successful',
+        'CONTACT_SUBMITTED' => 'Contact Submitted',
+        'MEMBERSHIP_SUBMITTED' => 'Membership Submitted',
+        'LICENSING_SUBMITTED' => 'Licensing Submitted',
+    ];
+    return $known[$action] ?? ucwords(strtolower(str_replace('_', ' ', $action)));
+}
+
+function status_badge(string $status): string
+{
+    $class = match (strtolower(trim($status))) {
+        'approved', 'active', 'read' => 'green',
+        'received', 'under review', 'in review' => 'blue',
+        'new', 'unread' => 'red',
+        'denied', 'rejected', 'disabled' => 'danger',
+        default => 'gray',
+    };
+    return '<span class="badge ' . h($class) . '">' . h($status) . '</span>';
+}
+
+function page_header(string $eyebrow, string $title, string $description = '', string $meta = '', string $actionHtml = ''): void
+{
+    echo '<div class="page-header"><div><p class="eyebrow">' . h($eyebrow) . '</p><h1>' . h($title) . '</h1>';
+    if ($description !== '') echo '<p class="page-description">' . h($description) . '</p>';
+    if ($meta !== '') echo '<p class="page-meta">' . h($meta) . '</p>';
+    echo '</div>';
+    if ($actionHtml !== '') echo '<div class="page-actions">' . $actionHtml . '</div>';
+    echo '</div>';
+}
+
 function admin_nav(string $active): string
 {
     $items = [
-        'dashboard.php' => ['Dashboard', 'dashboard', 'D'],
-        'membership.php' => ['Membership', 'membership', 'M'],
-        'licensing.php' => ['Licensing', 'licensing', 'L'],
-        'messages.php' => ['Messages', 'messages', 'C'],
-        'training.php' => ['Training CMS', 'training', 'T'],
-        'settings.php' => ['Settings', 'settings', 'S'],
-        'admins.php' => ['Admin Users', 'admins', 'U'],
-        'audit.php' => ['Audit Log', 'audit', 'A'],
+        'dashboard.php' => ['Dashboard', 'dashboard'],
+        'membership.php' => ['Membership', 'membership'],
+        'licensing.php' => ['Licensing', 'licensing'],
+        'messages.php' => ['Messages', 'messages'],
+        'training.php' => ['Training CMS', 'training'],
+        'settings.php' => ['Settings', 'settings'],
+        'admins.php' => ['Admin Users', 'admins'],
+        'audit.php' => ['Audit Log', 'audit'],
     ];
     $html = '';
-    foreach ($items as $href => [$label, $key, $icon]) {
+    foreach ($items as $href => [$label, $key]) {
         if (in_array($key, ['admins', 'audit'], true) && current_admin_role() !== 'Super Admin') {
             continue;
         }
@@ -192,15 +242,16 @@ function admin_nav(string $active): string
             continue;
         }
         $class = $active === $key ? ' class="active"' : '';
-        $html .= '<a' . $class . ' href="' . h($href) . '" data-icon="' . h($icon) . '"><span class="nav-label">' . h($label) . '</span></a>';
+        $current = $active === $key ? ' aria-current="page"' : '';
+        $html .= '<a' . $class . $current . ' href="' . h($href) . '" title="' . h($label) . '">' . admin_icon($key) . '<span class="nav-label">' . h($label) . '</span></a>';
     }
-    return $html . '<a href="../index.html" target="_blank" rel="noopener" data-icon="W"><span class="nav-label">View Website</span></a><a href="logout.php" data-icon="Q"><span class="nav-label">Logout</span></a>';
+    return '<div class="nav-primary">' . $html . '</div><div class="nav-secondary"><a href="../index.html" target="_blank" rel="noopener" title="View Website">' . admin_icon('website') . '<span class="nav-label">View Website</span></a><a href="logout.php" title="Logout">' . admin_icon('logout') . '<span class="nav-label">Logout</span></a></div>';
 }
 
 function admin_layout_start(string $title, string $active = ''): void
 {
     $initials = strtoupper(substr((string)($_SESSION['admin_name'] ?? 'A'), 0, 1));
-    echo '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="noindex,nofollow"><title>' . h($title) . '</title><link rel="stylesheet" href="../assets/css/styles.css"><script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script><script defer src="../assets/js/admin.js"></script></head><body class="admin-body"><div class="admin-overlay" tabindex="-1"></div><div class="admin-shell"><aside class="sidebar" id="adminSidebar"><div class="side-brand"><img src="../assets/img/logo.png" alt="Logo"><h2>NGCN Admin</h2></div><p>' . h($_SESSION['admin_name'] ?? '') . '<br><span>' . h(current_admin_role()) . '</span></p><nav>' . admin_nav($active) . '</nav></aside><header class="admin-topbar"><div class="admin-left"><button class="admin-menu-button" type="button" aria-label="Toggle admin menu" aria-controls="adminSidebar" aria-expanded="false">☰</button><div><div class="breadcrumb">' . h($title) . '</div><small>' . h(date('M j, Y')) . '</small></div></div><div class="admin-avatar"><span>' . h($initials) . '</span><strong>' . h($_SESSION['admin_name'] ?? 'Admin') . '</strong></div></header><main class="admin-main">';
+    echo '<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="robots" content="noindex,nofollow"><title>' . h($title) . '</title><link rel="stylesheet" href="../assets/css/styles.css"><script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script><script defer src="../assets/js/admin.js"></script></head><body class="admin-body"><div class="admin-overlay" tabindex="-1"></div><div class="admin-shell"><aside class="sidebar" id="adminSidebar" aria-label="Admin navigation"><div class="side-brand"><img src="../assets/img/logo.png" alt="Newpath logo"><h2>NGCN Admin</h2><button class="sidebar-close" type="button" aria-label="Close admin menu">&times;</button></div><div class="admin-identity"><strong>' . h($_SESSION['admin_name'] ?? '') . '</strong><span>' . h(current_admin_role()) . '</span></div><nav>' . admin_nav($active) . '</nav></aside><header class="admin-topbar"><div class="admin-left"><button class="admin-menu-button" type="button" aria-label="Toggle admin menu" aria-controls="adminSidebar" aria-expanded="false"><span></span><span></span><span></span></button><div><div class="breadcrumb">' . h($title) . '</div><small>' . h(date('M j, Y')) . '</small></div></div><div class="profile-menu"><button class="profile-trigger" type="button" aria-haspopup="true" aria-expanded="false"><span class="admin-initials">' . h($initials) . '</span><span class="profile-copy"><strong>' . h($_SESSION['admin_name'] ?? 'Admin') . '</strong><small>' . h(current_admin_role()) . '</small></span></button><div class="profile-dropdown" role="menu"><a href="settings.php" role="menuitem">Profile Settings</a><a href="logout.php" role="menuitem">Logout</a></div></div></header><main class="admin-main">';
 }
 
 function admin_layout_end(): void

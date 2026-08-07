@@ -2,6 +2,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const menuButton = document.querySelector('.admin-menu-button');
   const sidebar = document.querySelector('.sidebar');
   const overlay = document.querySelector('.admin-overlay');
+  const closeButton = document.querySelector('.sidebar-close');
+  const profileMenu = document.querySelector('.profile-menu');
+  const profileTrigger = document.querySelector('.profile-trigger');
   const isMobile = () => window.matchMedia('(max-width: 760px)').matches;
 
   const closeSidebar = () => {
@@ -28,15 +31,35 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   overlay?.addEventListener('click', closeSidebar);
+  closeButton?.addEventListener('click', closeSidebar);
   sidebar?.querySelectorAll('a').forEach((link) => link.addEventListener('click', closeSidebar));
   document.addEventListener('keydown', (event) => {
-    if (event.key === 'Escape') closeSidebar();
+    if (event.key === 'Escape') {
+      closeSidebar();
+      profileMenu?.classList.remove('open');
+      profileTrigger?.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  profileTrigger?.addEventListener('click', () => {
+    const open = !profileMenu?.classList.contains('open');
+    profileMenu?.classList.toggle('open', open);
+    profileTrigger.setAttribute('aria-expanded', String(open));
+  });
+  document.addEventListener('click', (event) => {
+    if (!profileMenu?.contains(event.target)) {
+      profileMenu?.classList.remove('open');
+      profileTrigger?.setAttribute('aria-expanded', 'false');
+    }
   });
 
   const chart = document.getElementById('applicationsChart');
   if (chart && window.Chart) {
     const labels = JSON.parse(chart.dataset.labels || '[]');
     const values = JSON.parse(chart.dataset.values || '[]');
+    if (!values.some((value) => Number(value) > 0)) {
+      chart.closest('.chart-frame')?.insertAdjacentHTML('beforeend', '<div class="empty-state compact">No application data for this period yet.</div>');
+    }
     new Chart(chart, {
       type: 'line',
       data: {
@@ -55,7 +78,8 @@ document.addEventListener('DOMContentLoaded', () => {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: { legend: { display: false } },
+        interaction: { intersect: false, mode: 'index' },
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: (context) => `${context.parsed.y} applications` } } },
         scales: {
           y: { beginAtZero: true, ticks: { precision: 0 } },
           x: { grid: { display: false } },
@@ -103,6 +127,46 @@ document.addEventListener('DOMContentLoaded', () => {
       button.dataset.originalText = button.textContent;
       button.textContent = button.dataset.loadingText || 'Working...';
       button.disabled = true;
+    });
+  });
+
+  document.querySelectorAll('form[data-change-submit]').forEach((form) => {
+    const button = form.querySelector('button[type="submit"], button:not([type])');
+    const fields = Array.from(form.querySelectorAll('input:not([type="hidden"]), select, textarea'));
+    const initial = fields.map((field) => field.value).join('\u001f');
+    const update = () => {
+      if (button) button.disabled = fields.map((field) => field.value).join('\u001f') === initial;
+    };
+    fields.forEach((field) => field.addEventListener('input', update));
+    fields.forEach((field) => field.addEventListener('change', update));
+    update();
+  });
+
+  const confirmAction = (message) => new Promise((resolve) => {
+    const modal = document.createElement('div');
+    modal.className = 'confirm-modal';
+    modal.innerHTML = `<div class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirmTitle"><h2 id="confirmTitle">Confirm action</h2><p>${message}</p><div class="confirm-actions"><button type="button" class="btn secondary" data-cancel>Cancel</button><button type="button" class="btn danger" data-confirm-ok>Confirm</button></div></div>`;
+    document.body.appendChild(modal);
+    const done = (value) => {
+      modal.remove();
+      resolve(value);
+    };
+    modal.querySelector('[data-cancel]')?.addEventListener('click', () => done(false));
+    modal.querySelector('[data-confirm-ok]')?.addEventListener('click', () => done(true));
+    modal.addEventListener('click', (event) => {
+      if (event.target === modal) done(false);
+    });
+    modal.querySelector('[data-cancel]')?.focus();
+  });
+
+  document.querySelectorAll('button[data-confirm]').forEach((button) => {
+    button.addEventListener('click', async (event) => {
+      if (button.dataset.confirmed === 'true') return;
+      event.preventDefault();
+      const ok = await confirmAction(button.dataset.confirm || 'Continue?');
+      if (!ok) return;
+      button.dataset.confirmed = 'true';
+      button.click();
     });
   });
 });

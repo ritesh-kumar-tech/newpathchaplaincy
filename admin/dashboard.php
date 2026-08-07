@@ -20,22 +20,22 @@ foreach ($stmt->fetchAll() as $row) {
 }
 admin_layout_start('Admin Dashboard', 'dashboard');
 ?>
-<div class="topbar"><div><p class="eyebrow">Administrative Back-End</p><h1>Dashboard</h1><p>Welcome, <?php echo h($_SESSION['admin_name']); ?>.</p></div><a class="btn secondary" href="logout.php">Logout</a></div>
+<?php page_header('Administrative Back-End', 'Dashboard', 'Welcome, ' . ($_SESSION['admin_name'] ?? 'Admin') . '.', 'Last updated ' . date('M j, Y g:i A')); ?>
 <?php if (!empty($_GET['password_changed'])): ?><p class="form-note success">Password changed successfully.</p><?php endif; ?>
 <section class="metric-grid">
-  <a class="metric" href="membership.php"><span>Total members</span><strong><?php echo h($metrics['members']); ?></strong></a>
-  <a class="metric" href="membership.php?status=New"><span>Pending applications</span><strong><?php echo h($metrics['pending_members']); ?></strong></a>
-  <a class="metric" href="licensing.php?status=Received"><span>Pending licensing</span><strong><?php echo h($metrics['pending_licenses']); ?></strong></a>
-  <a class="metric" href="messages.php"><span>Unread messages</span><strong><?php echo h($metrics['unread_messages']); ?></strong></a>
+  <a class="metric" href="membership.php"><?php echo admin_icon('membership'); ?><span>Total members</span><strong><?php echo h($metrics['members']); ?></strong><small>All submitted membership records</small></a>
+  <a class="metric" href="membership.php?status=New"><?php echo admin_icon('membership'); ?><span>Pending applications</span><strong><?php echo h($metrics['pending_members']); ?></strong><small>New or in-review applications</small></a>
+  <a class="metric" href="licensing.php?status=Received"><?php echo admin_icon('licensing'); ?><span>Pending licensing</span><strong><?php echo h($metrics['pending_licenses']); ?></strong><small>Received or under review</small></a>
+  <a class="metric" href="messages.php"><?php echo admin_icon('messages'); ?><span>Unread messages</span><strong><?php echo h($metrics['unread_messages']); ?></strong><small>Awaiting inbox attention</small></a>
 </section>
 <section class="module-grid" aria-label="Admin modules">
-  <a class="module-card" href="membership.php"><strong>Membership Applications</strong><span>Review, search, update status, notes, export CSV.</span></a>
-  <a class="module-card" href="licensing.php"><strong>Licensing Requests</strong><span>Manage review pipeline and internal notes.</span></a>
-  <a class="module-card" href="messages.php"><strong>Contact Inbox</strong><span>Read, archive, delete, and reply by email.</span></a>
-  <a class="module-card" href="training.php"><strong>Training CMS</strong><span>Edit the public training cards instantly.</span></a>
-  <a class="module-card" href="settings.php"><strong>Settings</strong><span>Update profile and frontend contact details.</span></a>
-  <?php if (current_admin_role() === 'Super Admin'): ?><a class="module-card" href="admins.php"><strong>Admin Users</strong><span>Create, disable, enable, and reset admins.</span></a><a class="module-card" href="audit.php"><strong>Audit Log</strong><span>Search paginated security and action records.</span></a><?php endif; ?>
+  <a class="module-card" href="membership.php"><?php echo admin_icon('membership'); ?><strong>Membership Applications</strong><span>Review, search, update status, notes, export CSV.</span><em>View</em></a>
+  <a class="module-card" href="licensing.php"><?php echo admin_icon('licensing'); ?><strong>Licensing Requests</strong><span>Manage review pipeline and internal notes.</span><em>View</em></a>
+  <a class="module-card" href="messages.php"><?php echo admin_icon('messages'); ?><strong>Contact Inbox</strong><span>Read, archive, delete, and reply by email.</span><em>View</em></a>
+  <a class="module-card" href="training.php"><?php echo admin_icon('training'); ?><strong>Training CMS</strong><span>Edit the public training cards instantly.</span><em>View</em></a>
+  <a class="module-card" href="settings.php"><?php echo admin_icon('settings'); ?><strong>Settings</strong><span>Update profile and frontend contact details.</span><em>View</em></a>
+  <?php if (current_admin_role() === 'Super Admin'): ?><a class="module-card" href="admins.php"><?php echo admin_icon('admins'); ?><strong>Admin Users</strong><span>Create, disable, enable, and reset admins.</span><em>View</em></a><a class="module-card" href="audit.php"><?php echo admin_icon('audit'); ?><strong>Audit Log</strong><span>Search paginated security and action records.</span><em>View</em></a><?php endif; ?>
 </section>
-<section class="panel chart-panel"><h2>Applications Per Month</h2><canvas id="applicationsChart" data-labels='<?php echo h(json_encode(array_keys($months))); ?>' data-values='<?php echo h(json_encode(array_values($months))); ?>'></canvas></section>
-<br><section class="panel"><h2>Recent Activity</h2><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Date</th><th>Admin</th><th>Action</th><th>Details</th><th>IP</th></tr></thead><tbody><?php if (!$activity): ?><tr><td colspan="5">No recent activity yet.</td></tr><?php endif; foreach ($activity as $row): ?><tr><td data-label="Date"><?php echo h($row['created_at']); ?></td><td data-label="Admin"><?php echo h($row['admin_email']); ?></td><td data-label="Action"><?php echo h($row['action']); ?></td><td data-label="Details"><?php echo h($row['details']); ?></td><td data-label="IP"><?php echo h($row['ip_address']); ?></td></tr><?php endforeach; ?></tbody></table></div></section>
+<section class="panel chart-panel"><div class="panel-heading"><div><h2>Applications Per Month</h2><p>Membership submissions over the last six months.</p></div><span class="legend-dot">Membership applications</span></div><div class="chart-frame"><canvas id="applicationsChart" data-labels='<?php echo h(json_encode(array_keys($months))); ?>' data-values='<?php echo h(json_encode(array_values($months))); ?>'></canvas></div></section>
+<section class="panel"><div class="panel-heading"><div><h2>Recent Activity</h2><p>Latest administrative and public submission events.</p></div><?php if (current_admin_role() === 'Super Admin'): ?><a class="btn secondary" href="audit.php">View All Activity</a><?php endif; ?></div><div class="admin-table-wrap"><table class="admin-table"><thead><tr><th>Date</th><th>Admin</th><th>Action</th><th>Details</th><th>IP</th></tr></thead><tbody><?php if (!$activity): ?><tr><td colspan="5"><div class="empty-state compact">No recent activity yet.</div></td></tr><?php endif; foreach ($activity as $row): ?><tr><td data-label="Date"><?php echo h(date('M j, Y g:i A', strtotime((string)$row['created_at']))); ?></td><td data-label="Admin"><?php echo h($row['admin_email']); ?></td><td data-label="Action"><?php echo status_badge(readable_action($row['action'])); ?></td><td data-label="Details"><?php echo h($row['details']); ?></td><td data-label="IP"><?php echo h($row['ip_address']); ?></td></tr><?php endforeach; ?></tbody></table></div></section>
 <?php admin_layout_end(); ?>

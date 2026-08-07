@@ -38,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 admin_layout_start('Change Password', 'settings');
 ?>
-<div class="topbar"><div><p class="eyebrow">Account Security</p><h1>Change Password</h1></div></div>
+<?php page_header('Account Security', 'Change Password', 'Update your password using the current strength and history requirements.'); ?>
 <section class="panel security-card">
   <div class="security-context">
     <h2>Password Reset</h2>
